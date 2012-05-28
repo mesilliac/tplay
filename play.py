@@ -118,11 +118,10 @@ semiquaver = crotchet / 2**2
 minim = crotchet * 2**1
 bar = crotchet * 2**2
 
-# ensure clean fade-in
-sine.silence(quaver) >> playback
-
 # play some test melodies
-def play_from_command_line():
+def play_test_melodies():
+    # ensure clean fade-in
+    sine.silence(quaver) >> playback
     try:
         loop(m1,t1, transpose=1, repeat=4)
         loop(m2,t2,bpm=200,transpose=0,alternate_swing=True,repeat=1)
@@ -133,11 +132,16 @@ def play_from_command_line():
         loop(m6,t6,bpm=133*2,transpose=2/12.0,repeat=2)
         loop(m7,t7,repeat=2)
     except KeyboardInterrupt: exit()
-# if running standalone
-if __name__ == "__main__": play_from_command_line()
 
 def play_bugle_song():
     t = '...     ...     ... ... ...     ...     ...     ...             '
     m = [g2,g2,c3,g2,c3,e3,g2,c3,e3,g2,c3,e3,g2,c3,e3,g3,e3,c3,e3,c3,g2,g2,g2,c3]
     loop(m,t,swing=True)
+
+# parse and play from command line
+def play_from_command_line():
+    play_test_melodies()
+
+# if running standalone
+if __name__ == "__main__": play_from_command_line()
 
