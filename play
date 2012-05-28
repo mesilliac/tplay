@@ -159,8 +159,6 @@ def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', s
     if mode == 'minor':
         scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10),t(root,12)]
     def get_note_length(playhead):
-        note = song[playhead]
-        assert note.isdigit()
         duration = 1
         while playhead < len(song)-1:
             playhead += 1
@@ -168,15 +166,33 @@ def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', s
             if char == '~' or char.isspace(): duration += 1
             else: break
         return duration
+    def get_transpose(playhead):
+        sign = +1
+        while playhead < len(song)-1 and not song[playhead] == '}':
+            playhead += 1
+            c = song[playhead]
+            if c == '-': sign = -1
+            elif c.isdigit(): return 2**(int(c)*sign/12.0)
     note = None
     playhead = -1
+    metadata = False
+    transpose = 1.0
     try:
         while playhead < len(song):
             playhead += 1
-            if playhead == len(song) and loop: playhead = -1; continue
+            print playhead,
+            if playhead == len(song):
+                if loop: playhead = -1; continue
+                else: break
             char = song[playhead]
-            if char.isdigit(): # new note
+            if metadata: # parse metadata
+                if char == 't': transpose *= get_transpose(playhead)
+                elif char == '}': metadata = False
+                else: pass
+                continue
+            elif char.isdigit(): # new note
                 freq = scale[int(char)]
+                if transpose: freq *= transpose
                 length = get_note_length(playhead)
                 note = (spb*length, freq)
             elif char.isspace(): continue # do whatever
@@ -186,10 +202,14 @@ def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', s
             elif char == ']': spb *= 2; continue
             elif char == '(': spb *= 2; continue
             elif char == ')': spb /= 2; continue
+            elif char == '{': metadata = True; continue
+            elif char == '#': note = (spb*get_note_length(playhead),note[1]*2**(1/12.0))
+            elif char == 'b': note = (spb*get_note_length(playhead),note[1]*2**(-1/12.0))
             else: raise Exception("unrecognized character '%s'" % char)
+            print(note)
             if note[1]: bass.play(*note) / math.log(note[1]/clipping_freq,2) >> playback
             else: sine.silence(note[0]) >> playback
-    except KeyboardInterrupt: pass
+    except KeyboardInterrupt: print("...ciao")
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
