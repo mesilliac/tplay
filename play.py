@@ -186,6 +186,7 @@ def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', s
             elif char == ']': spb *= 2; continue
             elif char == '(': spb *= 2; continue
             elif char == ')': spb /= 2; continue
+            else: raise Exception("unrecognized character '%s'" % char)
             if note[1]: bass.play(*note) / math.log(pitch/clipping_freq,2) >> playback
             else: sine.silence(note[0]) >> playback
     except KeyboardInterrupt: pass
