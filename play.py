@@ -5,6 +5,7 @@ import Nsound
 samplerate = 44100 # per second
 nchannels = 2 # per sample
 bits = 16 # per channel?
+clipping_freq = 16.0
 sine = Nsound.Sine(samplerate)
 # playback
 out = Nsound.AudioStream(samplerate,nchannels)
@@ -46,7 +47,7 @@ def play(melody,timing,bpm=200,swing=False,transpose=0,instrument=bass):
         if transpose: pitch *= pitch_multiplier
         duration *= beat_length
         playhead += 1
-        yield instrument.play(duration,pitch) / math.log(pitch,2)
+        yield instrument.play(duration,pitch) / math.log(pitch/clipping_freq,2)
 
 # play something once
 def play_once(*args,**kwargs):
@@ -123,7 +124,7 @@ def play_test_melodies():
     # ensure clean fade-in
     sine.silence(quaver) >> playback
     try:
-        loop(m1,t1, transpose=12, repeat=4)
+        loop(m1,t1, transpose=12, repeat=2)
         loop(m2,t2,bpm=200,transpose=0,alternate_swing=True,repeat=1)
         loop(m3a,t3a,swing=True,repeat=1)
         loop(m3b,t3b,swing=True,repeat=1)
@@ -131,6 +132,7 @@ def play_test_melodies():
         loop(m5,t5,repeat=1)
         loop(m6,t6,bpm=133*2,transpose=2,repeat=2)
         loop(m7,t7,repeat=2)
+        loop(m4,t4)
     except KeyboardInterrupt: exit()
 
 def play_bugle_song():
@@ -140,7 +142,53 @@ def play_bugle_song():
 
 # parse and play from command line
 def play_from_command_line():
-    play_test_melodies()
+    from optparse import OptionParser
+    options, args = OptionParser().parse_args()
+    if not args: play_test_melodies(); exit()
+    print(args)
+    song = args[0]
+    play_song(song)
+
+# play a song
+def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', speed=100.0, loop=True):
+    spb = 60.0/speed # seconds per beat
+    sine.silence(spb*1) >> playback
+    t = lambda a,b: a*2**(b/12.0)
+    if mode == 'major':
+        scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11),t(root,12)]
+    if mode == 'minor':
+        scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10),t(root,12)]
+    def get_note_length(playhead):
+        note = song[playhead]
+        assert note.isdigit()
+        duration = 1
+        while playhead < len(song)-1:
+            playhead += 1
+            char = song[playhead]
+            if char == '~' or char.isspace(): duration += 1
+            else: break
+        return duration
+    note = None
+    playhead = -1
+    try:
+        while playhead < len(song):
+            playhead += 1
+            if playhead == len(song) and loop: playhead = -1; continue
+            char = song[playhead]
+            if char.isdigit(): # new note
+                freq = scale[int(char)]
+                length = get_note_length(playhead)
+                note = (spb*length, freq)
+            elif char.isspace(): continue # do whatever
+            elif char == '~': continue # sustain note
+            elif char == '.': note = (spb, 0)
+            elif char == '[': spb /= 2; continue
+            elif char == ']': spb *= 2; continue
+            elif char == '(': spb *= 2; continue
+            elif char == ')': spb /= 2; continue
+            if note[1]: bass.play(*note) / math.log(pitch/clipping_freq,2) >> playback
+            else: sine.silence(note[0]) >> playback
+    except KeyboardInterrupt: pass
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
