@@ -123,13 +123,13 @@ def play_test_melodies():
     # ensure clean fade-in
     sine.silence(quaver) >> playback
     try:
-        loop(m1,t1, transpose=1, repeat=4)
+        loop(m1,t1, transpose=12, repeat=4)
         loop(m2,t2,bpm=200,transpose=0,alternate_swing=True,repeat=1)
         loop(m3a,t3a,swing=True,repeat=1)
         loop(m3b,t3b,swing=True,repeat=1)
         loop(m4,t4,swing=True,repeat=2)
         loop(m5,t5,repeat=1)
-        loop(m6,t6,bpm=133*2,transpose=2/12.0,repeat=2)
+        loop(m6,t6,bpm=133*2,transpose=2,repeat=2)
         loop(m7,t7,repeat=2)
     except KeyboardInterrupt: exit()
 
