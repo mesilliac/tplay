@@ -71,7 +71,7 @@ def loop(*args,**kwargs):
 
 # notes for melody use
 a4 = 440.00
-# (note)(octave) = (a4)*2**(octave-4)*2**(note-a)
+# (note)(octave) = (a4)*2**(octave-4)*2**(note-(a))
 for octave in range(8):
     for key,count in zip(['c','cs','d','ds','e','f','fs','g','gs','a','as','b'],range(12)):
         exec(str(key)+str(octave)+' = a4*2**'+str((octave-4)+(count-9)/12.0))
