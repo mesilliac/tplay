@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""usage:
+$ play [song] [options]
+    or
+>>> import play
+>>> play.play_once(melody,timing,**options)
+>>> play.loop(melody,timing,**options)
+>>> play.play_song(song,**options)
+"""
 import math
 import Nsound
 # setup
@@ -150,8 +158,9 @@ def play_from_command_line():
     play_song(song)
 
 # play a song
-def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', speed=100.0, loop=True):
+def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', speed=100.0, loop=True, transpose=0):
     spb = 60.0/speed # seconds per beat
+    transpose = 2**(transpose/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
     t = lambda a,b: a*2**(b/12.0)
     if mode == 'major':
@@ -176,7 +185,6 @@ def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', s
     note = None
     playhead = -1
     metadata = False
-    transpose = 1.0
     try:
         while playhead < len(song):
             playhead += 1
