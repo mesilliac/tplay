@@ -148,19 +148,40 @@ def play_bugle_song():
     m = [g2,g2,c3,g2,c3,e3,g2,c3,e3,g2,c3,e3,g2,c3,e3,g3,e3,c3,e3,c3,g2,g2,g2,c3]
     loop(m,t,swing=True)
 
+# does what it says on the tin
+def init_optparse_from_function(parser,function):
+    f = function.func_code
+    defaults = function.func_defaults
+    nargs = f.co_argcount
+    for n in range(nargs):
+        name = f.co_varnames[n]
+        m = n + len(defaults) - nargs
+        if m < 0: # has no default value
+            parser.add_option("--"+name,dest=name)
+        else: # has a default value
+            parser.add_option("--"+name,dest=name,default=defaults[m])
+    nd = len(defaults)
+    # mutter mumble
+    return (f.co_varnames[nargs-nd+x] for x in range(nd))
+
 # parse and play from command line
 def play_from_command_line():
     from optparse import OptionParser
-    options, args = OptionParser().parse_args()
+    parser = OptionParser()
+    default_keys = init_optparse_from_function(parser,play_song)
+    options,args = parser.parse_args()
     if not args: play_test_melodies(); exit()
+    print(options)
     print(args)
-    song = args[0]
-    play_song(song)
+    # it is retarded that options is not already a dict-like object.
+    # might as well just exec('x='+str(options)) mutter mumble
+    play_song(*args,**{k:getattr(options,k) for k in default_keys})
 
 # play a song
-def play_song(song="045[4567]45[4567]45[421~~~][.421]", root=a1, mode='major', speed=100.0, loop=True, transpose=0):
-    spb = 60.0/speed # seconds per beat
-    transpose = 2**(transpose/12.0) # transpose by semitones
+def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
+    """play_song("045[4567]45[4567]45[421~~~][.421]",110,'minor',70,False,-12)"""
+    spb = 60.0/float(speed) # seconds per beat
+    transpose = 2**(float(transpose)/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
     t = lambda a,b: a*2**(b/12.0)
     if mode == 'major':
