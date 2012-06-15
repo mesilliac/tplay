@@ -255,7 +255,8 @@ def play_song(song="156[5678]56[5678]56[532~~~][.532]",
                 else: pass
                 continue
             elif char.isdigit(): # new note
-                freq = scale[int(char)-1]
+                if char == '0': freq = root*2**(-5/12.0)
+                else: freq = scale[int(char)-1]
                 if transpose: freq *= transpose
                 length = get_note_length(playhead,beat_count%2)
                 beat_count += 1
