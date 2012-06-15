@@ -193,11 +193,11 @@ def get_note(name):
     a = 9 # 'c d ef g a b'.find('a')
     return a4*2**((octave-4)+(note+sharp-a)/12.0)
 
-#TODO: add swing capability
 # play a song
-def play_song(song, root='a2', mode='major', bpm=100.0, loop=True, transpose=0):
+def play_song(song, root='a2', mode='major', bpm=100.0, loop=True, transpose=0, swing=True):
     """play_song("156[5678]56[5678]56[532~~~][.532]",110,'minor',70,False,-12)"""
     spb = 60.0/float(bpm) # seconds per beat
+    if swing: spb /= 1.5
     transpose = 2**(float(transpose)/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
     t = lambda a,b: a*2**(b/12.0)
@@ -209,12 +209,17 @@ def play_song(song, root='a2', mode='major', bpm=100.0, loop=True, transpose=0):
         scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11),t(root,12)]
     if mode == 'minor':
         scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10),t(root,12)]
-    def get_note_length(playhead):
+    def get_note_length(playhead,swing_offset=0):
         duration = 1
+        beat_count = swing_offset
+        if swing and not beat_count % 2: duration += 1
         while playhead < len(song)-1:
             playhead += 1
             char = song[playhead]
-            if char == '~' or char.isspace(): duration += 1
+            if char == '~' or char.isspace():
+                duration += 1
+                beat_count += 1
+                if swing and not beat_count % 2: duration += 1
             else: break
         return duration
     def get_transpose(playhead):
@@ -227,6 +232,7 @@ def play_song(song, root='a2', mode='major', bpm=100.0, loop=True, transpose=0):
     note = None
     playhead = -1
     metadata = False
+    beat_count = 0
     try:
         while playhead < len(song):
             playhead += 1
@@ -243,18 +249,19 @@ def play_song(song, root='a2', mode='major', bpm=100.0, loop=True, transpose=0):
             elif char.isdigit(): # new note
                 freq = scale[int(char)-1]
                 if transpose: freq *= transpose
-                length = get_note_length(playhead)
+                length = get_note_length(playhead,beat_count%2)
+                beat_count += 1
                 note = (spb*length, freq)
-            elif char.isspace(): continue # do whatever
-            elif char == '~': continue # sustain note
-            elif char == '.': note = (spb, 0)
+            elif char.isspace(): beat_count += 1; continue # do whatever
+            elif char == '~': beat_count += 1; continue # sustain note
+            elif char == '.': note = (spb, 0); beat_count += 1;
             elif char == '[': spb /= 2; continue
             elif char == ']': spb *= 2; continue
             elif char == '(': spb *= 2; continue
             elif char == ')': spb /= 2; continue
             elif char == '{': metadata = True; continue
-            elif char == '#': note = (spb*get_note_length(playhead),note[1]*2**(1/12.0))
-            elif char == 'b': note = (spb*get_note_length(playhead),note[1]*2**(-1/12.0))
+            elif char == '#': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(1/12.0)); beat_count += 1
+            elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(-1/12.0)); beat_count += 1
             else: raise Exception("unrecognized character '%s'" % char)
             #print(note)
             if note[1]: bass.play(*note) / math.log(note[1]/clipping_freq,2) >> playback
