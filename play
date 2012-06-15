@@ -184,7 +184,7 @@ def get_note(name):
     # (note)(octave) = (a4)*2**(octave-4)*2**(note-(a))
     name = name.lower()
     note = 'c d ef g a b'.find(name[0]) # sharps and flats parsed below
-    if note < 0: return
+    if note < 0: raise ValueError('unparsable note name', name)
     sharp = 0 # semitones higher
     if name[1] in '#s': sharp = +1
     elif name[1] in 'bf': sharp = -1
