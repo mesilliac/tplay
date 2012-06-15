@@ -180,9 +180,9 @@ def play_from_command_line():
 
 #TODO: add swing capability
 # play a song
-def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
+def play_song(song, root=a1, mode='major', bpm=100.0, loop=True, transpose=0):
     """play_song("156[5678]56[5678]56[532~~~][.532]",110,'minor',70,False,-12)"""
-    spb = 60.0/float(speed) # seconds per beat
+    spb = 60.0/float(bpm) # seconds per beat
     transpose = 2**(float(transpose)/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
     t = lambda a,b: a*2**(b/12.0)
