@@ -215,9 +215,13 @@ def play_song(song="156[5678]56[5678]56[532~~~][.532]",
     except ValueError:
         root = get_note(root) # name
     if mode == 'major':
-        scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11),t(root,12)]
+        scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)]
     if mode == 'minor':
-        scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10),t(root,12)]
+        scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)]
+    class Scale: pass
+    Scale.__init__ = lambda x,scale: setattr(x,'real',scale)
+    Scale.__getitem__ = lambda x,a: x.real[a%len(x.real)]*2**(a//len(x.real))
+    scale = Scale(scale) # a semi-imaginary scale
     def get_note_length(playhead,swing_offset=0):
         duration = 1
         beat_count = swing_offset
@@ -231,17 +235,23 @@ def play_song(song="156[5678]56[5678]56[532~~~][.532]",
                 if swing and not beat_count % 2: duration += 1
             else: break
         return duration
-    def get_transpose(playhead):
+    def get_number(playhead):
         sign = +1
+        digits = []
         while playhead < len(song)-1 and not song[playhead] == '}':
             playhead += 1
             c = song[playhead]
-            if c == '-': sign = -1
-            elif c.isdigit(): return 2**(int(c)*sign/12)
+            if c.isdigit(): digits.append(c)
+            elif digits: break
+            elif c == '-': sign = -1
+            elif c == '+': sign = +1
+            else: digits.append('0'); break # or something
+        return int(''.join(digits))*sign
     note = None
     playhead = -1
     metadata = False
     beat_count = 0
+    rotate = 0
     try:
         while playhead < len(song):
             playhead += 1
@@ -251,13 +261,14 @@ def play_song(song="156[5678]56[5678]56[532~~~][.532]",
                 else: break
             char = song[playhead]
             if metadata: # parse metadata
-                if char == 't': transpose *= get_transpose(playhead)
+                if char == 't': transpose *= 2**(get_number(playhead)/12)
+                elif char == 'r': rotate += get_number(playhead)
                 elif char == '}': metadata = False
                 else: pass
                 continue
             elif char.isdigit(): # new note
                 if char == '0': freq = root*2**(-5/12)
-                else: freq = scale[int(char)-1]
+                else: freq = scale[int(char)+rotate-1]
                 if transpose: freq *= transpose
                 length = get_note_length(playhead,beat_count%2)
                 beat_count += 1

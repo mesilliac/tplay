@@ -1,0 +1,2 @@
+#!/bin/sh
+./play [3210]{r-2} --transpose=24 $@
