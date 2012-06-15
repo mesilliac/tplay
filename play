@@ -179,7 +179,7 @@ def play_from_command_line():
 
 # play a song
 def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
-    """play_song("045[4567]45[4567]45[421~~~][.421]",110,'minor',70,False,-12)"""
+    """play_song("156[5678]56[5678]56[532~~~][.532]",110,'minor',70,False,-12)"""
     spb = 60.0/float(speed) # seconds per beat
     transpose = 2**(float(transpose)/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
@@ -220,7 +220,7 @@ def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
                 else: pass
                 continue
             elif char.isdigit(): # new note
-                freq = scale[int(char)]
+                freq = scale[int(char)-1]
                 if transpose: freq *= transpose
                 length = get_note_length(playhead)
                 note = (spb*length, freq)
