@@ -1,0 +1,2 @@
+#!/bin/sh
+./play ~13131~13131~~~~ --swing --mode=minor --bpm=200 $@
