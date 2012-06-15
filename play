@@ -178,14 +178,32 @@ def play_from_command_line():
     # might as well just exec('x='+str(options)) mutter mumble
     play_song(*args,**{k:getattr(options,k) for k in default_keys})
 
+# get note by name
+def get_note(name):
+    # (note)(octave) = (a4)*2**(octave-4)*2**(note-(a))
+    name = name.lower()
+    note = 'c d ef g a b'.find(name[0]) # sharps and flats parsed below
+    if note < 0: return
+    sharp = 0 # semitones higher
+    if name[1] in '#s': sharp = +1
+    elif name[1] in 'bf': sharp = -1
+    octave = int(name[1+abs(sharp):])
+    a4 = 440 # 440Hz = concert pitch A4
+    a = 9 # 'c d ef g a b'.find('a')
+    return a4*2**((octave-4)+(note+sharp-a)/12.0)
+
 #TODO: add swing capability
 # play a song
-def play_song(song, root=a1, mode='major', bpm=100.0, loop=True, transpose=0):
+def play_song(song, root='a1', mode='major', bpm=100.0, loop=True, transpose=0):
     """play_song("156[5678]56[5678]56[532~~~][.532]",110,'minor',70,False,-12)"""
     spb = 60.0/float(bpm) # seconds per beat
     transpose = 2**(float(transpose)/12.0) # transpose by semitones
     sine.silence(spb*1) >> playback
     t = lambda a,b: a*2**(b/12.0)
+    try:
+        root = float(root) # Hz?
+    except ValueError:
+        root = get_note(root) # name
     if mode == 'major':
         scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11),t(root,12)]
     if mode == 'minor':
