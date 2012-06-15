@@ -209,7 +209,7 @@ def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
     try:
         while playhead < len(song):
             playhead += 1
-            print playhead,
+            #print playhead,
             if playhead == len(song):
                 if loop: playhead = -1; continue
                 else: break
@@ -235,7 +235,7 @@ def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
             elif char == '#': note = (spb*get_note_length(playhead),note[1]*2**(1/12.0))
             elif char == 'b': note = (spb*get_note_length(playhead),note[1]*2**(-1/12.0))
             else: raise Exception("unrecognized character '%s'" % char)
-            print(note)
+            #print(note)
             if note[1]: bass.play(*note) / math.log(note[1]/clipping_freq,2) >> playback
             else: sine.silence(note[0]) >> playback
     except KeyboardInterrupt: print("...ciao")
