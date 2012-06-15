@@ -27,6 +27,7 @@ bd01 = Nsound.DrumBD01(samplerate)
 hat = Nsound.Hat(samplerate)
 flute = Nsound.FluteSlide(samplerate)
 
+#TODO: split out to separate module and enable command-line player for this function
 # play a given melody with the given timing
 def play(melody,timing,bpm=200,swing=False,transpose=0,instrument=bass):
     """play(melody,timing,bpm=200,swing=False,transpose=0,instrument=bass):
@@ -177,6 +178,7 @@ def play_from_command_line():
     # might as well just exec('x='+str(options)) mutter mumble
     play_song(*args,**{k:getattr(options,k) for k in default_keys})
 
+#TODO: add swing capability
 # play a song
 def play_song(song, root=a1, mode='major', speed=100.0, loop=True, transpose=0):
     """play_song("156[5678]56[5678]56[532~~~][.532]",110,'minor',70,False,-12)"""
