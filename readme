@@ -13,6 +13,12 @@ from within python:
     play('12345678',bpm=200,loop=True)
     assert play.get_note('a4') == 440
 
+requirements
+============
+
+Python 2.7 (python.org)
+Nsound (nsound.sourceforge.net)
+
 hacking
 =======
 
