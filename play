@@ -88,15 +88,13 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
     if loop == 1: loop = -1 # infinite loopings
     elif loop == 0: loop = +1 # play once
     sine.silence(spb*1) >> playback
-    t = lambda a,b: a*2**(b/12)
-    try:
-        root = float(root) # Hz?
-    except ValueError:
-        root = get_note(root) # name
+    try: root = float(root) # Hz?
+    except ValueError: root = get_note(root) # name
     # Scale: a semi-imaginary scale. based on real scales, honest.
     class Scale: pass
     Scale.__init__ = lambda x,scale: setattr(x,'real',scale)
     Scale.__getitem__ = lambda x,a: x.real[a%len(x.real)]*2**(a//len(x.real))
+    t = lambda a,b: a*2**(b/12)
     major_scale = Scale([root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)])
     minor_scale = Scale([root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)])
     if mode == 'minor': scale = minor_scale
