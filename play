@@ -80,7 +80,7 @@ def get_note(name):
 
 # play a song
 def play(song="156[5678]56[5678]56[532~~~][.532]",
-              root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
+         root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
     spb = 60/float(bpm) # seconds per beat
     if swing: spb *= 2/3
     transpose = 2**(float(transpose)/12) # transpose by semitones
