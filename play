@@ -60,7 +60,7 @@ def parse_argv_for(function):
 # parse and play from command line
 def play_from_command_line():
     args, kwargs = parse_argv_for(play)
-    print(args)
+    #print(args)
     print(kwargs)
     play(*args,**kwargs)
 
