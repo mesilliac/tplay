@@ -47,7 +47,7 @@ def parse_argv_for(function):
             if len(argv) > 1+n and not argv[1+n].startswith('--'):
                 value = argv[1+n]
                 kwargs[name] = value
-            for arg in argv[1:]:
+            for arg in argv[1:]: # not the most efficient
                 if arg.startswith('--'+name):
                     if '=' in arg:
                         value = arg.split('=')[1]
