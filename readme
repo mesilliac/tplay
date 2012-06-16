@@ -1,0 +1,35 @@
+a simple automated melody player.
+
+usage
+=====
+
+from the command line:
+
+    ./play 12345678 --bpm=200 --loop
+
+from within python:
+
+    from play import play
+    play('12345678',bpm=200,loop=True)
+    assert play.get_note('a4') == 440
+
+hacking
+=======
+
+git commit messages should be one line describing the change.
+
+* if more than one change, and can't fit on one line,
+  list using bullet points.
+* like so.
+* try to keep to 74 characters per line.
+
+in the code,
+functions should have a one-line comment before them,
+summarizing what they do in plain english.
+
+indent is four spaces per level.
+
+copyright
+=========
+
+GPL v.2 or any later version.
