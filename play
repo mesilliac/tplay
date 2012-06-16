@@ -93,14 +93,14 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
         root = float(root) # Hz?
     except ValueError:
         root = get_note(root) # name
-    if mode == 'major':
-        scale = [root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)]
-    if mode == 'minor':
-        scale = [root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)]
+    # Scale: a semi-imaginary scale. based on real scales, honest.
     class Scale: pass
     Scale.__init__ = lambda x,scale: setattr(x,'real',scale)
     Scale.__getitem__ = lambda x,a: x.real[a%len(x.real)]*2**(a//len(x.real))
-    scale = Scale(scale) # a semi-imaginary scale
+    major_scale = Scale([root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)])
+    minor_scale = Scale([root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)])
+    if mode == 'minor': scale = minor_scale
+    else: scale = major_scale
     def get_note_length(playhead,swing_offset=0):
         duration = 1
         beat_count = swing_offset
@@ -163,6 +163,8 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
             elif char == '{': metadata = True; continue
             elif char == '#': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(1/12)); beat_count += 1
             elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(-1/12)); beat_count += 1
+            elif char == 'm': scale = minor_scale; continue
+            elif char == 'M': scale = major_scale; continue
             else: raise Exception("unrecognized character '%s'" % char)
             #print(note)
             if note[1]: bass.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
