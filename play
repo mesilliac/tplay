@@ -54,7 +54,8 @@ def parse_argv_for(function):
                         try: value = json.loads(value)
                         except ValueError: pass
                     else: value = True
-            kwargs[name]=value
+            kwargs[name] = value
+            if value == defaults[m]: kwargs.pop(name) # don't bother transmitting defaults
     return args,kwargs
 
 # parse and play from command line
