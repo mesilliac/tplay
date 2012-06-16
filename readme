@@ -9,8 +9,8 @@ from the command line:
 
 from within python:
 
-    from play import play
-    play('12345678',bpm=200,loop=True)
+    import play
+    play.play('12345678',bpm=200,loop=True)
     assert play.get_note('a4') == 440
 
 requirements
