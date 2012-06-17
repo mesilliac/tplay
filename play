@@ -108,6 +108,7 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
     minor_scale = Scale([root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)])
     if mode == 'minor': scale = minor_scale
     else: scale = major_scale
+    # TODO: remove. need to work out how to sustain notes without clipping and without readahead.
     def get_note_length(playhead,swing_offset=0):
         duration = 1
         beat_count = swing_offset
