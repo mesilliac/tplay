@@ -79,6 +79,14 @@ def get_note(name):
     a = 9 # 'c d ef g a b'.find('a')
     return a4*2**((octave-4)+(note+sharp-a)/12)
 
+# song characters
+song_characters = {
+    '0123345678~+*-_. ': 'data',
+    '()[]': 'tempo',
+    '{}': 'structure',
+    'abcdefgABCDEFG#bsf': 'names',
+    'tTrRmM\n': 'other'}
+
 # play a song
 def play(song="156[5678]56[5678]56[532~~~][.532]",
          root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
@@ -113,21 +121,9 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
                 if swing and not beat_count % 2: duration += 1
             else: break
         return duration
-    def get_number(playhead):
-        sign = +1
-        digits = []
-        while playhead < len(song)-1 and not song[playhead] == '}':
-            playhead += 1
-            c = song[playhead]
-            if c.isdigit(): digits.append(c)
-            elif digits: break
-            elif c == '-': sign = -1
-            elif c == '+': sign = +1
-            else: digits.append('0'); break # or something
-        return int(''.join(digits))*sign
     note = None
     playhead = -1
-    metadata = False
+    meta = 0
     beat_count = 0
     rotate = 0
     try:
@@ -139,12 +135,25 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
                 if loop: playhead = -1; continue
                 else: break
             char = song[playhead]
-            if metadata: # parse metadata
-                if char == 't': transpose *= 2**(get_number(playhead)/12)
-                elif char == 'r': rotate += get_number(playhead)
-                elif char == '}': metadata = False
-                else: pass
-                continue
+            if not filter(None, (char in x for x in song_characters)):
+                raise Exception("unrecognized character '%s'" % char)
+            if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
+            elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
+            elif char == 'R': playhead += 1; rotate += int(song[playhead]); continue
+            elif char == 'r': playhead += 1; rotate -= int(song[playhead]); continue
+            elif char == 'M': scale = major_scale; continue
+            elif char == 'm': scale = minor_scale; continue
+            elif char == '{': meta += 1; continue
+            elif char == '}': meta -= 1; continue
+            elif char == '[': spb /= 2; continue
+            elif char == ']': spb *= 2; continue
+            elif char == '(': spb *= 2; continue
+            elif char == ')': spb /= 2; continue
+            elif char.isspace(): beat_count += 1; continue # do whatever
+            elif char == '~': beat_count += 1; continue # sustain note
+            elif char == '.': beat_count += 1; note = (spb, 0);
+            elif char == '#': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(1/12)); beat_count += 1
+            elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(-1/12)); beat_count += 1
             elif char.isdigit(): # new note
                 if char == '0': freq = root*2**(-5/12)
                 else: freq = scale[int(char)+rotate-1]
@@ -152,19 +161,6 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
                 length = get_note_length(playhead,beat_count%2)
                 beat_count += 1
                 note = (spb*length, freq)
-            elif char.isspace(): beat_count += 1; continue # do whatever
-            elif char == '~': beat_count += 1; continue # sustain note
-            elif char == '.': note = (spb, 0); beat_count += 1;
-            elif char == '[': spb /= 2; continue
-            elif char == ']': spb *= 2; continue
-            elif char == '(': spb *= 2; continue
-            elif char == ')': spb /= 2; continue
-            elif char == '{': metadata = True; continue
-            elif char == '#': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(1/12)); beat_count += 1
-            elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2),note[1]*2**(-1/12)); beat_count += 1
-            elif char == 'm': scale = minor_scale; continue
-            elif char == 'M': scale = major_scale; continue
-            else: raise Exception("unrecognized character '%s'" % char)
             #print(note)
             if note[1]: bass.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
             else: sine.silence(note[0]) >> playback
