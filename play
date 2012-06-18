@@ -128,15 +128,16 @@ def play(song=None,
             else: break
         return duration
     playhead = -1
+    meta = 0
+    rotate = 0
     try:
         while playhead < len(song):
             playhead += 1
             if not playhead:
                 note = None
-                meta = 0
                 beat_count = 0
-                rotate = 0
                 spb = 60/float(bpm)
+                if swing: spb *= 2/3
             # if new line from stdin then start playing that
             if play_from_stdin:
                 try: new_song = sys.stdin.readline()
