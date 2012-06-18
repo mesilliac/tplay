@@ -142,10 +142,8 @@ def play(song=None,
             if play_from_stdin:
                 try: new_song = sys.stdin.readline()
                 except IOError: new_song = None
-                if new_song:
-                    playhead = -1
-                    if new_song.strip('\n'): song = new_song.strip('\n')
-                    continue
+                if new_song and new_song.strip('\n'):
+                    song = new_song.strip('\n'); playhead = -1; continue
             if playhead == len(song):
                 loop -= 1
                 if loop: playhead = -1; continue
