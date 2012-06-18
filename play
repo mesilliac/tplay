@@ -83,7 +83,7 @@ def get_note(name):
 song_characters = {
     '0123345678~+*-_. ': 'data',
     '()[]': 'tempo',
-    '{}': 'structure',
+    '{}:': 'structure',
     'abcdefgABCDEFG#bsf': 'names',
     'tTrRmM\n': 'other'}
 
@@ -166,6 +166,7 @@ def play(song=None,
             elif char == ']': spb *= 2; continue
             elif char == '(': spb *= 2; continue
             elif char == ')': spb /= 2; continue
+            elif char == ':': loop = -1; continue # TODO: number of repeats (need to parse sections to know what to repeat)
             elif char.isspace(): beat_count += 1; continue # do whatever
             elif char == '~': beat_count += 1; continue # sustain note
             elif char == '.': beat_count += 1; note = (spb, 0);
