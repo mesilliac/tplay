@@ -5,7 +5,7 @@ $ play [song] [options]
 >>> from play import play
 >>> play(song,**options)
 """
-from __future__ import division
+from __future__ import division, print_function
 import math
 import Nsound
 # setup
@@ -61,8 +61,8 @@ def parse_argv_for(function):
 # parse and play from command line
 def play_from_command_line():
     args, kwargs = parse_argv_for(play)
-    #print(args)
-    print(kwargs)
+    if args: print(args)
+    if kwargs: print(kwargs)
     play(*args,**kwargs)
 
 # get note by name
@@ -88,8 +88,13 @@ song_characters = {
     'tTrRmM\n': 'other'}
 
 # play a song
-def play(song="156[5678]56[5678]56[532~~~][.532]",
+def play(song=None,
          root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
+    play_from_stdin = not song # if no song, play lines from stdin
+    if play_from_stdin: # set stdin to non-blocking and set song to default
+        import sys, os, fcntl
+        fcntl.fcntl(sys.stdin,fcntl.F_SETFL,os.O_NONBLOCK)
+        song = '0'
     spb = 60/float(bpm) # seconds per beat
     if swing: spb *= 2/3
     transpose = 2**(float(transpose)/12) # transpose by semitones
@@ -122,21 +127,31 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
                 if swing and not beat_count % 2: duration += 1
             else: break
         return duration
-    note = None
     playhead = -1
-    meta = 0
-    beat_count = 0
-    rotate = 0
     try:
         while playhead < len(song):
             playhead += 1
-            #print playhead,
+            if not playhead:
+                note = None
+                meta = 0
+                beat_count = 0
+                rotate = 0
+                spb = 60/float(bpm)
+            # if new line from stdin then start playing that
+            if play_from_stdin:
+                try: new_song = sys.stdin.readline()
+                except IOError: new_song = None
+                if new_song:
+                    playhead = -1
+                    if new_song.strip('\n'): song = new_song.strip('\n')
+                    continue
             if playhead == len(song):
                 loop -= 1
                 if loop: playhead = -1; continue
                 else: break
             char = song[playhead]
-            if not filter(None, (char in x for x in song_characters)):
+            #print(char,end='')
+            if not filter(None,(char in x for x in song_characters)):
                 raise Exception("unrecognized character '%s'" % char)
             if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
             elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
@@ -162,7 +177,7 @@ def play(song="156[5678]56[5678]56[532~~~][.532]",
                 length = get_note_length(playhead,beat_count%2)
                 beat_count += 1
                 note = (spb*length, freq)
-            #print(note)
+            if play_from_stdin: sys.stdout.flush()
             if note[1]: bass.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
             else: sine.silence(note[0]) >> playback
     except KeyboardInterrupt: print("...ciao")
