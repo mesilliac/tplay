@@ -90,11 +90,16 @@ song_characters = {
 # play a song
 def play(song=None,
          root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
+    import os
     play_from_stdin = not song # if no song, play lines from stdin
     if play_from_stdin: # set stdin to non-blocking and set song to default
-        import sys, os, fcntl
+        import sys, fcntl
         fcntl.fcntl(sys.stdin,fcntl.F_SETFL,os.O_NONBLOCK)
         song = '0'
+    play_from_dir = os.path.isdir(song)
+    if play_from_dir: return [play(os.path.join(song,f)) for f in os.listdir(song)]
+    play_from_file = os.path.isfile(song)
+    if play_from_file: song = open(song).read()
     spb = 60/float(bpm) # seconds per beat
     if swing: spb *= 2/3
     transpose = 2**(float(transpose)/12) # transpose by semitones
