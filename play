@@ -202,7 +202,7 @@ def play(song=None,
                 beat_count += 1
                 note = (spb*length, freq)
             if play_from_stdin: sys.stdout.flush()
-            render(note)
+            if note: render(note)
     except KeyboardInterrupt: print("...ciao")
 
 # if running standalone
