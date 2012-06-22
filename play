@@ -28,11 +28,11 @@ instruments = {
     'flute' : Nsound.FluteSlide(samplerate),}
 # language
 song_characters = {
-    '0123345678~+*-_. ': 'data',
+    '0123345678~+*-_.': 'data',
     '()[]': 'tempo',
     '{}:;': 'structure',
     'abcdefgABCDEFG#bsf': 'names',
-    'tTrRmMwW\n': 'other'}
+    'tTrRmMwW \n': 'other'}
 
 # parse and play from command line
 def play_from_command_line():
@@ -190,7 +190,7 @@ def play(song=None,
                 if numloops < 0 or numloops > loop_counter[playhead-1]: playhead = this_loop
                 else: this_loop = playhead
                 continue
-            elif char.isspace(): beat_count += 1; continue # do whatever
+            elif char.isspace(): continue # do whatever
             elif char == '~': beat_count += 1; continue # sustain note
             elif char == '.': beat_count += 1; note = (spb, 0);
             elif char == '#': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(1/12)); beat_count += 1
