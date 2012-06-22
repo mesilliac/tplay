@@ -26,6 +26,20 @@ instruments = {
     'bd01' : Nsound.DrumBD01(samplerate),
     'hat' : Nsound.Hat(samplerate),
     'flute' : Nsound.FluteSlide(samplerate),}
+# language
+song_characters = {
+    '0123345678~+*-_. ': 'data',
+    '()[]': 'tempo',
+    '{}:;': 'structure',
+    'abcdefgABCDEFG#bsf': 'names',
+    'tTrRmMwW\n': 'other'}
+
+# parse and play from command line
+def play_from_command_line():
+    args, kwargs = parse_argv_for(play)
+    if args: print(args)
+    if kwargs: print(kwargs)
+    play(*args,**kwargs)
 
 # parse command line arguments for use as function arguments
 def parse_argv_for(function):
@@ -59,13 +73,6 @@ def parse_argv_for(function):
             if value == defaults[m]: kwargs.pop(name) # don't bother transmitting defaults
     return args,kwargs
 
-# parse and play from command line
-def play_from_command_line():
-    args, kwargs = parse_argv_for(play)
-    if args: print(args)
-    if kwargs: print(kwargs)
-    play(*args,**kwargs)
-
 # get note by name
 def get_note(name):
     # (note)(octave) = (a4)*2**(octave-4)*2**(note-(a))
@@ -79,14 +86,6 @@ def get_note(name):
     a4 = 440 # 440Hz = concert pitch A4
     a = 9 # 'c d ef g a b'.find('a')
     return a4*2**((octave-4)+(note+sharp-a)/12)
-
-# song characters
-song_characters = {
-    '0123345678~+*-_. ': 'data',
-    '()[]': 'tempo',
-    '{}:;': 'structure',
-    'abcdefgABCDEFG#bsf': 'names',
-    'tTrRmMwW\n': 'other'}
 
 # render a note
 def render(note,instrument=instruments['bass']):
