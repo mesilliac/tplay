@@ -18,13 +18,14 @@ sine = Nsound.Sine(samplerate)
 out = Nsound.AudioStream(samplerate,nchannels)
 playback = Nsound.AudioPlayback(samplerate,nchannels,bits)
 # instruments
-bass = Nsound.GuitarBass(samplerate)
-organ = Nsound.OrganPipe(samplerate) # requires dual channel output
-clarinet = Nsound.Clarinet(samplerate)
-kicker = Nsound.DrumKickBass(samplerate,1000,40)
-bd01 = Nsound.DrumBD01(samplerate)
-hat = Nsound.Hat(samplerate)
-flute = Nsound.FluteSlide(samplerate)
+instruments = {
+    'bass' : Nsound.GuitarBass(samplerate),
+    'organ' : Nsound.OrganPipe(samplerate), # requires dual channel output
+    'clarinet' : Nsound.Clarinet(samplerate),
+    'kicker' : Nsound.DrumKickBass(samplerate,1000,40),
+    'bd01' : Nsound.DrumBD01(samplerate),
+    'hat' : Nsound.Hat(samplerate),
+    'flute' : Nsound.FluteSlide(samplerate),}
 
 # parse command line arguments for use as function arguments
 def parse_argv_for(function):
@@ -88,13 +89,14 @@ song_characters = {
     'tTrRmMwW\n': 'other'}
 
 # render a note
-def render(note):
-    if note[1]: bass.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
+def render(note,instrument=instruments['bass']):
+    if note[1]: instrument.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
     else: sine.silence(note[0]) >> playback
 
 # play a song
 def play(song=None,
-         root='a1', mode='major', bpm=100, loop=False, transpose=0, swing=False):
+         root='a1', mode='major', bpm=100, loop=False, transpose=0,
+         swing=False, instrument='bass'):
     import os
     play_from_stdin = not song # if no song, play lines from stdin
     if play_from_stdin: # set stdin to non-blocking and set song to default
@@ -202,7 +204,7 @@ def play(song=None,
                 beat_count += 1
                 note = (spb*length, freq)
             if play_from_stdin: sys.stdout.flush()
-            if note: render(note)
+            if note: render(note,instruments[instrument])
     except KeyboardInterrupt: print("...ciao")
 
 # if running standalone
