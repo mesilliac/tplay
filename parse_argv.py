@@ -7,25 +7,25 @@ def for_func(function):
     nargs = f.co_argcount
     args = []
     kwargs = {}
-    for n in range(nargs):
+    keywords = {}
+    for i in xrange(1,len(argv)):
+        if argv[i].startswith('--'):
+            sa = argv[i][2:].split('=')
+            try: keywords[sa[0]] = json.loads(sa[1])
+            except ValueError: keywords[sa[0]] = sa[1]
+            except IndexError: keywords[sa[0]] = True
+    arguments = [x for x in argv[1:] if not x.startswith('--')]
+    print(arguments)
+    print(keywords)
+    for n in xrange(nargs):
         name = f.co_varnames[n]
         m = n + len(defaults) - nargs
         if m < 0: # has no default value
-            # obtain from argv
-            try: args.append(argv[n+1])
+            try: args.append(arguments[n])
             except IndexError: args.append(None)
         else: # has a default value
-            value = defaults[m]
-            if len(argv) > 1+n and not argv[1+n].startswith('--'):
-                value = argv[1+n]
-                kwargs[name] = value
-            for arg in argv[1:]: # not the most efficient
-                if arg.startswith('--'+name):
-                    if '=' in arg:
-                        value = arg.split('=')[1]
-                        try: value = json.loads(value)
-                        except ValueError: pass
-                    else: value = True
+            if n < len(arguments): value = arguments[n]
+            else: value = keywords.get(name,defaults[m])
             kwargs[name] = value
             if value == defaults[m]: kwargs.pop(name) # don't bother transmitting defaults
     return args,kwargs
