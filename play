@@ -9,7 +9,7 @@ from __future__ import division, print_function
 import math
 import Nsound
 # setup
-samplerate = 44100 # per second
+samplerate = 48000 # per second
 nchannels = 2 # per sample
 bits = 16 # per channel?
 clipping_freq = 16.0
