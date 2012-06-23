@@ -42,7 +42,8 @@ def play_from_command_line():
     args, kwargs = parse_argv.for_func(play)
     if args: print(args)
     if kwargs: print(kwargs)
-    play(*args,**kwargs)
+    try: play(*args,**kwargs)
+    except KeyboardInterrupt: print("...ciao"); exit()
 
 # get note by name
 def get_note(name):
@@ -116,68 +117,66 @@ def play(song=None,
     rotate = 0
     loop_counter = {}
     this_loop = playhead
-    try:
-        while playhead < len(song):
-            playhead += 1
-            if not playhead:
-                note = None
-                beat_count = 0
-                spb = 60/float(bpm)
-                if swing: spb *= 2/3
-            # if new line from stdin then start playing that
-            if play_from_stdin:
-                try: new_song = sys.stdin.readline()
-                except IOError: new_song = None
-                if new_song and new_song.strip('\n'):
-                    song = new_song.strip('\n'); playhead = -1; continue
-            if playhead == len(song):
-                loop -= 1
-                if loop: playhead = -1; continue
-                else: break
-            char = song[playhead]
-            #print(char,end='')
-            if not filter(None,(char in x for x in song_characters)):
-                raise Exception("unrecognized character '%s'" % char)
-            if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
-            elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
-            elif char == 'R': playhead += 1; rotate += int(song[playhead]); continue
-            elif char == 'r': playhead += 1; rotate -= int(song[playhead]); continue
-            elif char == 'M': scale = major_scale; continue
-            elif char == 'm': scale = minor_scale; continue
-            elif char == 'W' and not swing: swing = True; spb *= 2/3; continue
-            elif char == 'w' and swing: swing = False; spb *= 3/2; continue
-            elif char == '{': meta += 1; continue
-            elif char == '}': meta -= 1; continue
-            elif char == '[': spb /= 2; continue
-            elif char == ']': spb *= 2; continue
-            elif char == '(': spb *= 2; continue
-            elif char == ')': spb /= 2; continue
-            elif char == ';': this_loop = playhead; continue
-            elif char == ':':
-                loop_counter[playhead] = loop_counter.get(playhead,0) + 1
-                playhead += 1; numloops = -1
-                if playhead < len(song):
-                    c = song[playhead]
-                    if c.isdigit(): numloops = int(c)
-                    elif c == ':': this_loop = -1; loop_counter = {}; numloops = -1
-                if numloops < 0 or numloops > loop_counter[playhead-1]: playhead = this_loop
-                else: this_loop = playhead
-                continue
-            elif char.isspace(): continue # do whatever
-            elif char == '~': beat_count += 1; continue # sustain note
-            elif char == '.': beat_count += 1; note = (spb, 0);
-            elif char == '#': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(1/12)); beat_count += 1
-            elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(-1/12)); beat_count += 1
-            elif char.isdigit(): # new note
-                if char == '0': freq = root*2**(-5/12)
-                else: freq = scale[int(char)+rotate-1]
-                if transpose: freq *= transpose
-                length = get_note_length(playhead,beat_count%2,swing)
-                beat_count += 1
-                note = (spb*length, freq)
-            if play_from_stdin: sys.stdout.flush()
-            if note: render(note,instruments[instrument])
-    except KeyboardInterrupt: print("...ciao"); exit()
+    while playhead < len(song):
+        playhead += 1
+        if not playhead:
+            note = None
+            beat_count = 0
+            spb = 60/float(bpm)
+            if swing: spb *= 2/3
+        # if new line from stdin then start playing that
+        if play_from_stdin:
+            try: new_song = sys.stdin.readline()
+            except IOError: new_song = None
+            if new_song and new_song.strip('\n'):
+                song = new_song.strip('\n'); playhead = -1; continue
+        if playhead == len(song):
+            loop -= 1
+            if loop: playhead = -1; continue
+            else: break
+        char = song[playhead]
+        #print(char,end='')
+        if not filter(None,(char in x for x in song_characters)):
+            raise Exception("unrecognized character '%s'" % char)
+        if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
+        elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
+        elif char == 'R': playhead += 1; rotate += int(song[playhead]); continue
+        elif char == 'r': playhead += 1; rotate -= int(song[playhead]); continue
+        elif char == 'M': scale = major_scale; continue
+        elif char == 'm': scale = minor_scale; continue
+        elif char == 'W' and not swing: swing = True; spb *= 2/3; continue
+        elif char == 'w' and swing: swing = False; spb *= 3/2; continue
+        elif char == '{': meta += 1; continue
+        elif char == '}': meta -= 1; continue
+        elif char == '[': spb /= 2; continue
+        elif char == ']': spb *= 2; continue
+        elif char == '(': spb *= 2; continue
+        elif char == ')': spb /= 2; continue
+        elif char == ';': this_loop = playhead; continue
+        elif char == ':':
+            loop_counter[playhead] = loop_counter.get(playhead,0) + 1
+            playhead += 1; numloops = -1
+            if playhead < len(song):
+                c = song[playhead]
+                if c.isdigit(): numloops = int(c)
+                elif c == ':': this_loop = -1; loop_counter = {}; numloops = -1
+            if numloops < 0 or numloops > loop_counter[playhead-1]: playhead = this_loop
+            else: this_loop = playhead
+            continue
+        elif char.isspace(): continue # do whatever
+        elif char == '~': beat_count += 1; continue # sustain note
+        elif char == '.': beat_count += 1; note = (spb, 0);
+        elif char == '#': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(1/12)); beat_count += 1
+        elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(-1/12)); beat_count += 1
+        elif char.isdigit(): # new note
+            if char == '0': freq = root*2**(-5/12)
+            else: freq = scale[int(char)+rotate-1]
+            if transpose: freq *= transpose
+            length = get_note_length(playhead,beat_count%2,swing)
+            beat_count += 1
+            note = (spb*length, freq)
+        if play_from_stdin: sys.stdout.flush()
+        if note: render(note,instruments[instrument])
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
