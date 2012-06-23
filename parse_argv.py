@@ -15,8 +15,6 @@ def for_func(function):
             except ValueError: keywords[sa[0]] = sa[1]
             except IndexError: keywords[sa[0]] = True
     arguments = [x for x in argv[1:] if not x.startswith('--')]
-    print(arguments)
-    print(keywords)
     for n in xrange(nargs):
         name = f.co_varnames[n]
         m = n + len(defaults) - nargs
