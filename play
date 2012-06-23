@@ -8,6 +8,7 @@ $ play [song] [options]
 from __future__ import division, print_function
 import math
 import Nsound
+import instruments as _instruments
 # setup
 samplerate = 48000 # per second
 nchannels = 2 # per sample
@@ -25,7 +26,8 @@ instruments = {
     'kicker' : Nsound.DrumKickBass(samplerate,1000,40),
     'bd01' : Nsound.DrumBD01(samplerate),
     'hat' : Nsound.Hat(samplerate),
-    'flute' : Nsound.FluteSlide(samplerate),}
+    'flute' : Nsound.FluteSlide(samplerate),
+    'koto' : _instruments.Koto(samplerate),}
 # language
 song_characters = {
     '0123345678~+*-_.': 'data',
@@ -103,7 +105,9 @@ def play(song=None,
         fcntl.fcntl(sys.stdin,fcntl.F_SETFL,os.O_NONBLOCK)
         song = '0'
     play_from_dir = os.path.isdir(song)
-    if play_from_dir: return [play(os.path.join(song,f)) for f in os.listdir(song)]
+    if play_from_dir: return [
+        play(os.path.join(song,f),root,mode,bpm,loop,transpose,swing,instrument)
+        for f in os.listdir(song)]
     play_from_file = os.path.isfile(song)
     if play_from_file: song = open(song).read()
     spb = 60/float(bpm) # seconds per beat
