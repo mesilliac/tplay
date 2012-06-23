@@ -208,7 +208,7 @@ def play(song=None,
                 note = (spb*length, freq)
             if play_from_stdin: sys.stdout.flush()
             if note: render(note,instruments[instrument])
-    except KeyboardInterrupt: print("...ciao")
+    except KeyboardInterrupt: print("...ciao"); exit()
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
