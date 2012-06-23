@@ -18,5 +18,5 @@ class Koto():
             avg = 0.996*0.5*(ring[0] + ring[1])
             ring.append(avg)
             ring.popleft()
-        return out
+        return 0.25*out
 
