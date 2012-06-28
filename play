@@ -168,8 +168,8 @@ def play(song=None,
         elif char.isspace(): continue # do whatever
         elif char == '~': beat_count += 1; continue # sustain note
         elif char == '.': beat_count += 1; note = (spb, 0);
-        elif char == '#': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(1/12)); beat_count += 1
-        elif char == 'b': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(-1/12)); beat_count += 1
+        elif char == '+': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(1/12)); beat_count += 1
+        elif char == '-': note = (spb*get_note_length(playhead,beat_count%2,swing),note[1]*2**(-1/12)); beat_count += 1
         elif char.isdigit(): # new note
             if char == '0': freq = root*2**(-5/12)
             else: freq = scale[int(char)+rotate-1]
