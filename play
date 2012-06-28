@@ -30,11 +30,11 @@ instruments = {
     'koto' : _instruments.Koto(samplerate),}
 # language
 song_characters = {
-    '0123345678~+*-_.': 'data',
-    '()[]': 'tempo',
-    '{}:;': 'structure',
-    'abcdefgABCDEFG#bsf': 'names',
-    'tTrRmMwW \n': 'other'}
+    'data': '0123345678~+*-_.',
+    'tempo': '()[]',
+    'structure': '{}:;',
+    'names': 'abcdefgABCDEFG#bsf',
+    'other': 'tTrRmMwW \n'}
 
 # parse and play from command line
 def play_from_command_line():
@@ -137,7 +137,7 @@ def play(song=None,
             else: break
         char = song[playhead]
         #print(char,end='')
-        if not filter(None,(char in x for x in song_characters)):
+        if not filter(None,(char in x for x in song_characters.itervalues())):
             raise Exception("unrecognized character '%s'" % char)
         if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
         elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
