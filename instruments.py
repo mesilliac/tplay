@@ -10,6 +10,7 @@ class Koto():
         self.samplerate = samplerate
     def play(self,duration,frequency):
         samplerate = self.samplerate
+        if not frequency: return Nsound.Buffer.zeros(int(samplerate*duration))
         out = Nsound.AudioStream(samplerate,1) # mono
         cycles = int(samplerate/frequency)
         ring = collections.deque(Nsound.Buffer.rand(cycles).toList())
