@@ -33,7 +33,8 @@ song_characters = {
     'data': '0123345678~+*-_.',
     'tempo': '()[]',
     'structure': '{}:;',
-    'names': 'abcdefgABCDEFG#bsf',
+    'name0': 'abcdefgABCDEFG',
+    'name1+': '#bsfSF',
     'other': 'tTrRmMwW \n'}
 
 # parse and play from command line
@@ -95,10 +96,10 @@ def play(song=None,
     Scale.__init__ = lambda x,scale: setattr(x,'real',scale)
     Scale.__getitem__ = lambda x,a: x.real[a%len(x.real)]*2**(a//len(x.real))
     t = lambda a,b: a*2**(b/12)
-    major_scale = Scale([root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)])
-    minor_scale = Scale([root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)])
-    if mode == 'minor': scale = minor_scale
-    else: scale = major_scale
+    major_scale = lambda: Scale([root,t(root,2),t(root,4),t(root,5),t(root,7),t(root,9),t(root,11)])
+    minor_scale = lambda: Scale([root,t(root,2),t(root,3),t(root,5),t(root,7),t(root,8),t(root,10)])
+    if mode == 'minor': scale = minor_scale()
+    else: scale = major_scale()
     # TODO: remove. need to work out how to sustain notes without clipping and without readahead.
     def get_note_length(playhead,swing_offset=0,swing=swing):
         duration = 1
@@ -143,8 +144,8 @@ def play(song=None,
         elif char == 't': playhead += 1; transpose /= 2**(int(song[playhead])/12); continue
         elif char == 'R': playhead += 1; rotate += int(song[playhead]); continue
         elif char == 'r': playhead += 1; rotate -= int(song[playhead]); continue
-        elif char == 'M': scale = major_scale; continue
-        elif char == 'm': scale = minor_scale; continue
+        elif char == 'M': scale = major_scale(); continue
+        elif char == 'm': scale = minor_scale(); continue
         elif char == 'W' and not swing: swing = True; spb *= 2/3; continue
         elif char == 'w' and swing: swing = False; spb *= 3/2; continue
         elif char == '{': meta += 1; continue
@@ -176,6 +177,18 @@ def play(song=None,
             length = get_note_length(playhead,beat_count%2,swing)
             beat_count += 1
             note = (spb*length, freq)
+        elif char in song_characters['name0']: # parse the next few as needed
+            name = char
+            playhead += 1
+            while song[playhead] in song_characters['name1+']:
+                name += song[playhead]; playhead += 1
+            if not song[playhead].isdigit():
+                raise ValueError('note name must be followed by octave number',name,song[playhead])
+            name += song[playhead]
+            # note: do we want it to play the note, or set the root?
+            root = get_note(name)
+            diff = root / scale.real[0]
+            scale.real = [x*diff for x in scale.real]
         if play_from_stdin: sys.stdout.flush()
         if note: render(note,instruments[instrument])
 
