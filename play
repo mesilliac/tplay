@@ -191,6 +191,7 @@ def play(song=None,
             root = get_note(name)
             diff = root / scale.real[0]
             scale.real = [x*diff for x in scale.real]
+            continue
         if play_from_stdin: sys.stdout.flush()
         if note: render(note,instruments[instrument])
 
