@@ -66,14 +66,15 @@ def render(note,instrument=instruments['bass']):
     elif note[1]: instrument.play(*note).__div__(math.log(note[1]/clipping_freq,2)) >> playback
     else: sine.silence(note[0]) >> playback
 
+import sys
 # play a song
 def play(song=None,
          root='a1', mode='major', bpm=100, loop=False, transpose=0,
-         swing=False, instrument='bass'):
-    import os
+         swing=False, instrument='bass', log=sys.stderr.isatty()):
+    import sys, os
     play_from_stdin = not song # if no song, play lines from stdin
     if play_from_stdin: # set stdin to non-blocking and set song to default
-        import sys, fcntl
+        import fcntl
         fcntl.fcntl(sys.stdin,fcntl.F_SETFL,os.O_NONBLOCK)
         song = '0'
     play_from_dir = os.path.isdir(song)
@@ -137,7 +138,7 @@ def play(song=None,
             if loop: playhead = -1; continue
             else: break
         char = song[playhead]
-        #print(char,end='')
+        if log: sys.stderr.write(char); sys.stderr.flush()
         if not filter(None,(char in x for x in song_characters.itervalues())):
             raise Exception("unrecognized character '%s'" % char)
         if char == 'T': playhead += 1; transpose *= 2**(int(song[playhead])/12); continue
@@ -197,4 +198,3 @@ def play(song=None,
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
-
