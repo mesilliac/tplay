@@ -148,7 +148,7 @@ def play(song=None,
                 sys.stderr.write(song[playhead+1]); sys.stderr.flush()
             elif char in song_characters['data']: # include sustain
                 x = playhead+1
-                while song[x] in song_characters['sustain'] and x < len(song):
+                while x < len(song) and song[x] in song_characters['sustain']:
                     sys.stderr.write(song[x]); x += 1
                 sys.stderr.flush()
         if not filter(None,(char in x for x in song_characters.itervalues())):
