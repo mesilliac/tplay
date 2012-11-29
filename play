@@ -193,7 +193,6 @@ def play(song=None,
             diff = root / scale.real[0]
             scale.real = [x*diff for x in scale.real]
             continue
-        if play_from_stdin: sys.stdout.flush()
         if note: render(note,instruments[instrument])
     if log: sys.stderr.write('\n'); sys.stderr.flush()
 
