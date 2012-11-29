@@ -6,6 +6,8 @@ usage
 from the command line:
 
     ./play 12345678 --bpm=200 --loop
+    ./play songs
+    demos/designing_a_short_loop
 
 from within python:
 
