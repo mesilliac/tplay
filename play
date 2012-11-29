@@ -195,6 +195,7 @@ def play(song=None,
             continue
         if play_from_stdin: sys.stdout.flush()
         if note: render(note,instruments[instrument])
+    if log: sys.stderr.write('\n'); sys.stderr.flush()
 
 # if running standalone
 if __name__ == "__main__": play_from_command_line()
